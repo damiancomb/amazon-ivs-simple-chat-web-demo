@@ -14,14 +14,14 @@ Parameters:
 
 Resources:
   # Amazon IVS
-  Channel:
-    Type: AWS::IVS::Channel
-    Properties:
-      Name: simple-chat-demo
-  StreamKey:
-    Type: AWS::IVS::StreamKey
-    Properties:
-      ChannelArn: !Ref Channel
+#  Channel:
+#    Type: AWS::IVS::Channel
+#    Properties:
+#      Name: simple-chat-demo
+#  StreamKey:
+#    Type: AWS::IVS::StreamKey
+#    Properties:
+#      ChannelArn: !Ref Channel
 
   # Chat serverless backend
   SimpleChatWebSocket:
@@ -36,9 +36,9 @@ Resources:
       ApiId: !Ref SimpleChatWebSocket
       Description: Connect Integration
       IntegrationType: AWS_PROXY
-      IntegrationUri: 
+      IntegrationUri:
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectFunction.Arn}/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectFunction.Arn}/invocations
   ConnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -56,9 +56,9 @@ Resources:
       ApiId: !Ref SimpleChatWebSocket
       Description: Send Integration
       IntegrationType: AWS_PROXY
-      IntegrationUri: 
+      IntegrationUri:
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SendMessageFunction.Arn}/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SendMessageFunction.Arn}/invocations
   SendRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -76,9 +76,9 @@ Resources:
       ApiId: !Ref SimpleChatWebSocket
       Description: Disconnect Integration
       IntegrationType: AWS_PROXY
-      IntegrationUri: 
+      IntegrationUri:
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectFunction.Arn}/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectFunction.Arn}/invocations
   DisconnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -93,9 +93,9 @@ Resources:
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
-    - ConnectRoute
-    - SendRoute
-    - DisconnectRoute
+      - ConnectRoute
+      - SendRoute
+      - DisconnectRoute
     Properties:
       ApiId: !Ref SimpleChatWebSocket
   Stage:
@@ -109,11 +109,11 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-      - AttributeName: "connectionId"
-        AttributeType: "S"
+        - AttributeName: "connectionId"
+          AttributeType: "S"
       KeySchema:
-      - AttributeName: "connectionId"
-        KeyType: "HASH"
+        - AttributeName: "connectionId"
+          KeyType: "HASH"
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
@@ -131,8 +131,8 @@ Resources:
         Variables:
           TABLE_NAME: !Ref TableName
       Policies:
-      - DynamoDBCrudPolicy:
-          TableName: !Ref TableName
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
   SendMessageFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -144,14 +144,14 @@ Resources:
         Variables:
           TABLE_NAME: !Ref TableName
       Policies:
-      - DynamoDBCrudPolicy:
-          TableName: !Ref TableName
-      - Statement:
-        - Effect: Allow
-          Action:
-          - 'execute-api:ManageConnections'
-          Resource:
-          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SimpleChatWebSocket}/*'
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - 'execute-api:ManageConnections'
+              Resource:
+                - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SimpleChatWebSocket}/*'
   SendMessagePermission:
     Type: AWS::Lambda::Permission
     DependsOn:
@@ -179,8 +179,8 @@ Resources:
         Variables:
           TABLE_NAME: !Ref TableName
       Policies:
-      - DynamoDBCrudPolicy:
-          TableName: !Ref TableName
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
   OnDisconnectPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
@@ -194,15 +194,15 @@ Outputs:
   WebSocketURI:
     Description: "The WSS Protocol URI to connect to"
     Value: !Join [ '', [ 'wss://', !Ref SimpleChatWebSocket, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'Stage'] ]
-  ChannelArn:
-    Description: "Amazon IVS channel ARN:"
-    Value: !Ref Channel
-  ChannelIngestEndpoint:
-    Description: "Amazon IVS ingest server:"
-    Value: !Join [ '', [ 'rtmps://', !GetAtt Channel.IngestEndpoint, ':443/app/'] ]
-  StreamKey:
-    Description: "Amazon IVS stream key:"
-    Value: !GetAtt StreamKey.Value
-  ChannelPlaybackUrl:
-    Description: "Amazon IVS playback URL:"
-    Value: !GetAtt Channel.PlaybackUrl
+#  ChannelArn:
+#    Description: "Amazon IVS channel ARN:"
+#    Value: !Ref Channel
+#  ChannelIngestEndpoint:
+#    Description: "Amazon IVS ingest server:"
+#    Value: !Join [ '', [ 'rtmps://', !GetAtt Channel.IngestEndpoint, ':443/app/'] ]
+#  StreamKey:
+#    Description: "Amazon IVS stream key:"
+#    Value: !GetAtt StreamKey.Value
+#  ChannelPlaybackUrl:
+#    Description: "Amazon IVS playback URL:"
+#    Value: !GetAtt Channel.PlaybackUrl
